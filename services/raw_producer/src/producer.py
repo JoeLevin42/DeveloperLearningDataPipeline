@@ -3,7 +3,6 @@ import csv
 import json
 from confluent_kafka import Producer
 
-
 def produce_file(file_path, topic):
     try:
         producer = Producer({

@@ -17,11 +17,12 @@ from pathlib import Path
 
 from checkpoint_utils import Checkpoint
 from raw_utils import load_raw_ids, load_raw_by_id, PASSTHROUGH_FIELDS
-
 THIS_DIR = Path(__file__).resolve().parent
-DAY4_DIR = THIS_DIR.parent.parent.parent
-RAW_FILE = DAY4_DIR / "shared" / "data" / "developer_ai_learning_raw.csv"
-GOLDEN_FILE = DAY4_DIR / "instructor" / "expected" / "golden_sample_cleaned.json"
+DAY4_DIR = THIS_DIR.parent.parent
+
+RAW_FILE = DAY4_DIR / "data" / "developer_ai_learning_raw.csv"
+GOLDEN_FILE = DAY4_DIR / "instructor" / "expected" / "golden_sample_cleaned"
+CLEANED_FILE = DAY4_DIR / "analytics" / "notebook_cheks" / "cleaned_data.json"
 
 EXPECTED_FIELDS = {
     "ResponseId", "Age", "YearsCode", "DevType", "LearnCodeChoose",
