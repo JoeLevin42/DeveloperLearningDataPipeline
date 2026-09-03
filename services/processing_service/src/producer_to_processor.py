@@ -10,5 +10,6 @@ def produce_message(producer, topic, df):
         topic,
         value=json.dumps(data)
     )
+    print(f"Consumed row: {json.dumps(data)}")
 
-    producer.flush()
+    

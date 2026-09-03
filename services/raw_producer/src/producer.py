@@ -28,7 +28,7 @@ def produce_file(file_path, topic):
 
 if __name__ == "__main__":
     csv_path = (
-        Path(__file__).resolve().parents[2]
+        Path(__file__).resolve().parents[3]
         / "data"
         / "developer_ai_learning_raw.csv"
     )

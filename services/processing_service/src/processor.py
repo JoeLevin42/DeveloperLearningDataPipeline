@@ -9,7 +9,7 @@ def convert_to_dataframe(row):
     return pd.DataFrame([row])
 
 def convert_column_to_numeric(df):
-    df['YearsCode'] = df['YearsCode'].astype('Int64')
+    df['YearsCode'] = pd.to_numeric(df['YearsCode'], errors='coerce').astype('Int64')
     return df
 
 def split_multiselect(value):
