@@ -18,8 +18,9 @@ from raw_utils import load_raw_ids, load_raw_by_id
 from processed_contract import run_processed_contract_checks, check_golden_sample
 
 THIS_DIR = Path(__file__).resolve().parent
-DAY4_DIR = THIS_DIR.parent.parent.parent
-RAW_FILE = DAY4_DIR / "shared" / "data" / "developer_ai_learning_raw.csv"
+DAY4_DIR = THIS_DIR.parent.parent
+
+RAW_FILE = DAY4_DIR / "data" / "developer_ai_learning_raw.csv"
 GOLDEN_FILE = DAY4_DIR / "instructor" / "expected" / "golden_sample_processed.json"
 
 # processed field -> raw CSV field, for fields that should pass straight
