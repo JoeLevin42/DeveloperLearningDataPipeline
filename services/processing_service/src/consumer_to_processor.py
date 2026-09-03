@@ -1,8 +1,6 @@
 from confluent_kafka import Consumer
 import json
 
-from processor import process_row
-
 
 def consume_messages(topic):
     consumer = Consumer({
@@ -25,10 +23,8 @@ def consume_messages(topic):
                 continue
 
             row = json.loads(message.value().decode("utf-8"))
-
-            processed_row = process_row(row)
-
-            print(processed_row)
+            print(f"Consumed row: {row}")
+            yield row
 
     except KeyboardInterrupt:
         pass
