@@ -22,3 +22,9 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+  

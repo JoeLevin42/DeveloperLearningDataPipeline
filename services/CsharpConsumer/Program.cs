@@ -45,20 +45,23 @@ using var consumer = new ConsumerBuilder<Ignore, string>(config).Build();
 Console.WriteLine("Kafka consumer started..."); 
 Console.WriteLine("Waiting for messages...");
 
+consumer.Subscribe(topicName);
 try
 {
-    var result = consumer.Consume();
+    while (true)
+    {
+        var result = consumer.Consume();
 
-    Console.WriteLine($"Received message from topic: {result.Topic}");
-    string json = result.Message.Value;
+        Console.WriteLine($"Received message from topic: {result.Topic}");
+        string json = result.Message.Value;
 
-    var document = BsonDocument.Parse(json);
+        var document = BsonDocument.Parse(json);
 
-    await collection.InsertOneAsync(document);
-    Console.WriteLine("Message inserted into MongoDB.");
+        await collection.InsertOneAsync(document);
+        Console.WriteLine("Message inserted into MongoDB.");
 
-    consumer.Commit(result);
-
+        consumer.Commit(result);
+    }
 }
 catch (Exception ex)
 {

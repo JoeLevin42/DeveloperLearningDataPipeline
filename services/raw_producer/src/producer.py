@@ -21,7 +21,7 @@ def produce_file(file_path, topic):
                 )
 
         producer.flush()
-
+        print("Messages produces to Kafka successfully")
     except Exception as e:
         print(f"Error: {e}")
 
@@ -34,3 +34,4 @@ if __name__ == "__main__":
     )
 
     produce_file(csv_path, "raw_data")
+    
