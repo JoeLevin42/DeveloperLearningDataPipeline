@@ -2,12 +2,15 @@ from pathlib import Path
 import csv
 import json
 from confluent_kafka import Producer
+import os
+
+KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
 
 def produce_file(file_path, topic):
     try:
         producer = Producer({
-            "bootstrap.servers": "localhost:9092"
-        })
+    "bootstrap.servers": KAFKA_BROKER
+    })
 
         with open(file_path, "r", newline="", encoding="utf-8") as file:
             reader = csv.DictReader(file)
