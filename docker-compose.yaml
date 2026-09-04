@@ -1,0 +1,97 @@
+services:
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: developer-learning-kafka
+    ports:
+      - "9092:9092"
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --list > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  mongo:
+    image: mongo:8
+    container_name: developer-learning-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - pipeline-network
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping').ok\" --quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  raw-producer:
+    build:
+      context: ./services/raw_producer
+    container_name: developer-learning-raw-producer
+    environment:
+      KAFKA_BROKER: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - pipeline-network
+
+
+  processing-service:
+    build:
+      context: ./services/processing_service
+    container_name: developer-learning-processing
+    environment:
+      KAFKA_BROKER: kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - pipeline-network
+
+
+  csharp-consumer:
+    build:
+      context: ./services/CsharpConsumer
+    container_name: developer-learning-csharp-consumer
+    environment:
+      KAFKA_BROKER: kafka:9092
+      MONGO_CONNECTION_STRING: mongodb://mongo:27017
+      MONGO_DATABASE: DeveloperLearning
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+    networks:
+      - pipeline-network
+
+
+  api:
+    build:
+      context: ./services/api
+    container_name: developer-learning-api
+    environment:
+      MONGO_CONNECTION_STRING: mongodb://mongo:27017
+      MONGO_DATABASE: DeveloperLearning
+    depends_on:
+      mongo:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - pipeline-network
+
+
+networks:
+  pipeline-network:
+
+
+volumes:
+  mongo-data:

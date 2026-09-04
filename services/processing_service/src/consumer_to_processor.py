@@ -1,15 +1,16 @@
 from confluent_kafka import Consumer
 import json
 
-from processor import process_row
+import os
 
 
 def consume_messages(topic):
-    consumer = Consumer({
-        "bootstrap.servers": "localhost:9092",
-        "group.id": "raw-data-consumer",
-        "auto.offset.reset": "earliest"
-    })
+    KAFKA_BROKER = os.getenv("KAFKA_BROKER", "localhost:9092")
+    consumer = {
+    "bootstrap.servers": KAFKA_BROKER,
+    "group.id": "processor",
+    "auto.offset.reset": "earliest"
+}
 
     consumer.subscribe([topic])
 
@@ -25,10 +26,8 @@ def consume_messages(topic):
                 continue
 
             row = json.loads(message.value().decode("utf-8"))
-
-            processed_row = process_row(row)
-
-            print(processed_row)
+            print(f"Consumed row: {row}")
+            yield row
 
     except KeyboardInterrupt:
         pass
