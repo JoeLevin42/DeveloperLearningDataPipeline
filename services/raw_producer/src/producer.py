@@ -30,11 +30,8 @@ def produce_file(file_path, topic):
 
 
 if __name__ == "__main__":
-    csv_path = (
-        Path(__file__).resolve().parents[3]
-        / "data"
-        / "developer_ai_learning_raw.csv"
-    )
+    RAW_FILE = Path("/producerApp/data/developer_ai_learning_raw.csv")
+    
 
-    produce_file(csv_path, "raw_data")
+    produce_file(RAW_FILE, "raw_data")
     

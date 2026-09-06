@@ -3,14 +3,12 @@ using SurveyApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
-// Add services to the container.
+// Add services to the container
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 
 // MongoDB configuration
 
@@ -22,6 +20,9 @@ var mongoDatabase =
     Environment.GetEnvironmentVariable("MONGO_DATABASE")
     ?? builder.Configuration["SurveyDatabase:DatabaseName"];
 
+var mongoCollection =
+    Environment.GetEnvironmentVariable("MONGO_COLLECTION")
+    ?? builder.Configuration["SurveyDatabase:CollectionName"];
 
 // Create SurveyDatabase configuration
 
@@ -29,22 +30,17 @@ builder.Services.Configure<SurveyDatabaseSettings>(options =>
 {
     options.ConnectionString = mongoConnection;
     options.DatabaseName = mongoDatabase;
+    options.CollectionName = mongoCollection;
 });
-
 
 builder.Services.AddSingleton<SurveyService>();
 
-
 var app = builder.Build();
 
+// Configure the HTTP request pipeline
 
-// Configure the HTTP request pipeline.
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 

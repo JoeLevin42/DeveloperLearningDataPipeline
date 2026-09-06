@@ -1,9 +1,9 @@
+
 using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
-
 
 // =========================
 // Configuration
@@ -21,7 +21,7 @@ var configuration = new ConfigurationBuilder()
 
 var mongoConnection =
     Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")
-    ?? "mongodb://localhost:27017";
+    ?? "mongodb://mongo:27017";
 
 var mongoDatabaseName =
     Environment.GetEnvironmentVariable("MONGO_DATABASE")
@@ -37,45 +37,71 @@ services.AddSingleton(mongoDatabase);
 
 var serviceProvider = services.BuildServiceProvider();
 
+var database =
+    serviceProvider.GetRequiredService<IMongoDatabase>();
 
 
-// MongoDB Database & Collection
+// =========================
+// Kafka
+// =========================
 
-
-var database = serviceProvider.GetRequiredService<IMongoDatabase>();
-
-var topicName = configuration["Kafka:Topics"];
-
-var collection = database.GetCollection<BsonDocument>(topicName);
-
-
-
-var bootstrapServers =
-    Environment.GetEnvironmentVariable("KAFKA_BROKER")
-    ?? configuration["Kafka:BootstrapServers"];
-
-var groupId = configuration["Kafka:GroupId"];
+var topicName = "processed_data";
 
 var config = new ConsumerConfig
 {
-    BootstrapServers = bootstrapServers,
-    GroupId = groupId,
+    BootstrapServers = "kafka:9092",
+    GroupId = "some-group-3",
     AutoOffsetReset = AutoOffsetReset.Earliest,
     EnableAutoCommit = false
 };
 
 
+// =========================
+// MongoDB Collection
+// =========================
 
+var collection =
+    database.GetCollection<BsonDocument>(topicName);
+
+
+// =========================
+// Kafka Consumer
+// =========================
 
 using var consumer =
     new ConsumerBuilder<Ignore, string>(config).Build();
 
 Console.WriteLine("Kafka consumer started...");
+Console.WriteLine($"Kafka broker: {config.BootstrapServers}");
+Console.WriteLine($"Kafka topic: {topicName}");
+Console.WriteLine($"Kafka group: {config.GroupId}");
+
+
+// =========================
+// Assign Partition Directly
+// =========================
+
+var topicPartition =
+    new TopicPartition(
+        topicName,
+        new Partition(0));
+
+var topicPartitionOffset =
+    new TopicPartitionOffset(
+        topicPartition,
+        Offset.Beginning);
+
+consumer.Assign(topicPartitionOffset);
+
+Console.WriteLine(
+    "Assigned to processed_data partition 0 from beginning.");
+
 Console.WriteLine("Waiting for messages...");
 
-consumer.Subscribe(topicName);
 
-
+// =========================
+// Consume Messages
+// =========================
 
 try
 {
@@ -88,20 +114,24 @@ try
 
         string json = result.Message.Value;
 
-        var document = BsonDocument.Parse(json);
+        var document =
+            BsonDocument.Parse(json);
 
-        // Insert into MongoDB
         await collection.InsertOneAsync(document);
 
-        Console.WriteLine("Message inserted into MongoDB.");
-
-        consumer.Commit(result);
+        Console.WriteLine(
+            "Message inserted into MongoDB.");
     }
+}
+catch (ConsumeException ex)
+{
+    Console.WriteLine("Kafka consume error:");
+    Console.WriteLine(ex.Error.Reason);
 }
 catch (Exception ex)
 {
-    Console.WriteLine("An error occurred.");
-    Console.WriteLine($"Error: {ex.Message}");
+    Console.WriteLine("An error occurred:");
+    Console.WriteLine(ex.Message);
 }
 finally
 {
