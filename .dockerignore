@@ -1,0 +1,9 @@
+.git
+.vs
+**/bin
+**/obj
+**/.venv
+**/__pycache__
+*.pyc
+*.user
+validation/

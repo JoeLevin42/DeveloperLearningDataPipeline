@@ -18,12 +18,15 @@ def run_pipeline():
     producer = Producer(producer_config)
 
     try:
-        consume_messages(
-            producer,
-            "processed_data",
-            process_row,
-            produce_message
-        )
+        for row in consume_messages("raw_data"):
+
+            df = process_row(row)
+
+            produce_message(
+                producer,
+                "processed_data",
+                df
+            )
 
     finally:
         producer.flush()
